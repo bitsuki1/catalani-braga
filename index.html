@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
 <title>Catalani &amp; Braga — arquivo de família</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8C%B3%3C/text%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Catalani &amp; Braga — arquivo de família">
+<meta property="og:description" content="A árvore genealógica das famílias Catalani e Braga: seis gerações, de Celano e Teramo (Itália) e do Vêneto até São Paulo.">
+<meta property="og:url" content="https://bitsuki1.github.io/catalani-braga/">
+<meta property="og:locale" content="pt_BR">
 <style>
   :root{
     --bg:#f4f5f2;--card:#fff;--ink:#1f2733;--sub:#6c7787;--line:#e6e8e3;--line2:#f0f1ec;--field:#fff;
@@ -96,6 +102,7 @@
 
   /* svg tree */
   .tnode{cursor:pointer}
+  #svgTree,#svgFan{touch-action:none}
   .tcard{fill:var(--card);stroke:var(--line);stroke-width:1px;filter:drop-shadow(0 1px 1.5px rgba(20,28,36,.10))}
   .tnode:hover .tcard{stroke:var(--acc);stroke-width:1.5px;filter:drop-shadow(0 8px 18px rgba(20,28,36,.20))}
   .tnode .tn{font-family:var(--sans);font-weight:600;font-size:13px;fill:var(--ink)}
@@ -392,7 +399,7 @@ function fotoUrl(p){return p&&p.foto&&FOTOS[p.foto];}
 
 /* ================= NAV / VIEW SWITCH ================= */
 let VIEW='tree';
-function toggleTheme(){var r=document.documentElement;var d=window.matchMedia&&matchMedia('(prefers-color-scheme:dark)').matches;var cur=r.getAttribute('data-theme')||(d?'dark':'light');var nx=cur==='dark'?'light':'dark';r.setAttribute('data-theme',nx);var b=document.getElementById('tt');if(b)b.textContent=nx==='dark'?'☀':'☾';}
+function toggleTheme(){var r=document.documentElement;var d=window.matchMedia&&matchMedia('(prefers-color-scheme:dark)').matches;var cur=r.getAttribute('data-theme')||(d?'dark':'light');var nx=cur==='dark'?'light':'dark';r.setAttribute('data-theme',nx);try{localStorage.setItem('cb-tema',nx);}catch(e){}var b=document.getElementById('tt');if(b)b.textContent=nx==='dark'?'☀':'☾';}
 document.querySelectorAll('#segs button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('#segs button').forEach(x=>x.classList.remove('on'));b.classList.add('on');
   VIEW=b.dataset.v;
@@ -430,7 +437,7 @@ function pboxSvg(id,x,y,PW,PH){
   const av=f
     ?`<clipPath id="cp_${id}"><rect x="${pad}" y="${ay}" width="${ph}" height="${ph}" rx="11"/></clipPath><image href="${f}" x="${pad}" y="${ay}" width="${ph}" height="${ph}" clip-path="url(#cp_${id})" preserveAspectRatio="xMidYMid slice"/><rect x="${pad}" y="${ay}" width="${ph}" height="${ph}" rx="11" fill="none" style="stroke:var(${lc});stroke-width:1.6"/>`
     :`<rect x="${pad}" y="${ay}" width="${ph}" height="${ph}" rx="11" style="fill:color-mix(in srgb,var(${lc}) 12%,var(--card));stroke:var(${lc});stroke-width:1.4"/><text class="tini" x="${pad+ph/2}" y="${ay+ph/2+5}" text-anchor="middle" style="fill:var(${lc})">${ini(p.n)}</text>`;
-  return `<g class="tnode" transform="translate(${x},${y})" onclick="openSheet('${id}')" role="button" tabindex="0" onkeydown="if(event.key==='Enter')openSheet('${id}')">
+  return `<g class="tnode" transform="translate(${x},${y})" onclick="openSheet('${id}')" role="button" tabindex="0" aria-label="${p.n}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openSheet('${id}')}">
     <rect class="tcard" width="${PW}" height="${PH}" rx="15"/>
     ${av}
     <text class="tn" x="${tx}" y="${PH/2-3}">${trunc(p.n,15)}</text>
@@ -487,7 +494,7 @@ function drawFan(refit){
   const FS=[0,14.5,12.5,11,9.5];const MAXC=[0,16,13,11,9];
   const fp=P[focus];let s='';
   const fcol=fp.lin==='bra'?'--bra':'--cat';
-  s+=`<circle cx="${cx}" cy="${cy}" r="${r0}" style="fill:color-mix(in srgb,var(${fcol}) 12%,var(--card));stroke:var(${fcol});stroke-width:2.5" class="tnode" onclick="openSheet('${focus}')"/>`;
+  s+=`<circle cx="${cx}" cy="${cy}" r="${r0}" style="fill:color-mix(in srgb,var(${fcol}) 12%,var(--card));stroke:var(${fcol});stroke-width:2.5" class="tnode" onclick="openSheet('${focus}')" role="button" tabindex="0" aria-label="${fp.n}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openSheet('${focus}')}"/>`;
   s+=`<text x="${cx}" y="${cy-4}" text-anchor="middle" style="font-family:var(--name);font-size:16px;font-weight:600;fill:var(--ink)" pointer-events="none">${trunc(fp.n.split(' ')[0],12)}</text>`;
   const yr=(fp.b||'').replace(/[^0-9]/g,'').slice(-4);
   if(yr)s+=`<text x="${cx}" y="${cy+15}" text-anchor="middle" style="font-family:var(--mono);font-size:10.5px;fill:var(--sub)" pointer-events="none">${yr}</text>`;
@@ -498,7 +505,7 @@ function drawFan(refit){
     const lc=p?(p.lin==='bra'?'--bra':'--cat'):null;
     const fill=p?`color-mix(in srgb,var(${lc}) ${20-gen*2}%,var(--card))`:'color-mix(in srgb,var(--sub) 5%,var(--card))';
     const strokeC=p?`var(${lc})`:'var(--line)';
-    s+=`<path d="${arcSeg(cx,cy,r_in,r_out,a0,a1)}" style="fill:${fill};stroke:${strokeC};stroke-width:1;opacity:${p?1:0.5}" ${p?`class="tnode" onclick="openSheet('${id}')"`:''}/>`;
+    s+=`<path d="${arcSeg(cx,cy,r_in,r_out,a0,a1)}" style="fill:${fill};stroke:${strokeC};stroke-width:1;opacity:${p?1:0.5}" ${p?`class="tnode" onclick="openSheet('${id}')" role="button" tabindex="0" aria-label="${p.n}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openSheet('${id}')}"`:''}/>`;
     if(p){
       const rmid=(r_in+r_out)/2;const pt=polar(cx,cy,rmid,mid);
       let deg=mid*180/Math.PI;if(deg>90&&deg<270)deg+=180;
@@ -520,14 +527,19 @@ function fitFan(){const g=document.getElementById('vpF');if(!g)return;const bb=g
 
 /* pan/zoom pointer handlers (shared) */
 function attachPanZoom(svg,getS,apply){
-  let drag=false,lx,ly;
-  svg.addEventListener('pointerdown',e=>{drag=true;lx=e.clientX;ly=e.clientY;svg.setPointerCapture(e.pointerId);});
-  svg.addEventListener('pointermove',e=>{if(!drag)return;const s=getS();s.tx+=e.clientX-lx;s.ty+=e.clientY-ly;lx=e.clientX;ly=e.clientY;apply();});
-  svg.addEventListener('pointerup',e=>{drag=false;});
-  svg.addEventListener('pointercancel',()=>drag=false);
-  svg.addEventListener('wheel',e=>{e.preventDefault();const s=getS();const f=e.deltaY<0?1.12:.89;
-    const r=svg.getBoundingClientRect();const mx=e.clientX-r.left,my=e.clientY-r.top;
-    const nk=Math.max(.2,Math.min(3,s.k*f));const dk=nk/s.k;s.tx=mx-(mx-s.tx)*dk;s.ty=my-(my-s.ty)*dk;s.k=nk;apply();},{passive:false});
+  const pts=new Map();let lx,ly,pd=0;
+  function zoomAt(mx,my,f){const s=getS();const nk=Math.max(.2,Math.min(3,s.k*f));const dk=nk/s.k;s.tx=mx-(mx-s.tx)*dk;s.ty=my-(my-s.ty)*dk;s.k=nk;apply();}
+  svg.addEventListener('pointerdown',e=>{pts.set(e.pointerId,{x:e.clientX,y:e.clientY});try{svg.setPointerCapture(e.pointerId);}catch(_){}
+    if(pts.size===1){lx=e.clientX;ly=e.clientY;}
+    else if(pts.size===2){const a=[...pts.values()];pd=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);}});
+  svg.addEventListener('pointermove',e=>{if(!pts.has(e.pointerId))return;pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(pts.size>=2){const a=[...pts.values()];const nd=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);
+      if(pd>0){const r=svg.getBoundingClientRect();zoomAt((a[0].x+a[1].x)/2-r.left,(a[0].y+a[1].y)/2-r.top,nd/pd);}pd=nd;}
+    else{const s=getS();s.tx+=e.clientX-lx;s.ty+=e.clientY-ly;lx=e.clientX;ly=e.clientY;apply();}});
+  function up(e){pts.delete(e.pointerId);if(pts.size===1){const p=[...pts.values()][0];lx=p.x;ly=p.y;}pd=0;}
+  svg.addEventListener('pointerup',up);
+  svg.addEventListener('pointercancel',up);
+  svg.addEventListener('wheel',e=>{e.preventDefault();const r=svg.getBoundingClientRect();zoomAt(e.clientX-r.left,e.clientY-r.top,e.deltaY<0?1.12:.89);},{passive:false});
 }
 attachPanZoom(svgT,()=>T,applyT);
 attachPanZoom(svgF,()=>F,applyF);
@@ -644,7 +656,7 @@ function openSheet(id){
   const f=fotoUrl(p);const lc=p.lin==='bra'?'bra':'cat';const meta=[p.b,p.d].filter(Boolean).join(' · ');
   document.getElementById('shtop').innerHTML=`<span class="av ${lc}" style="${f?`background-image:url('${f}')`:''}">${f?'':ini(p.n)}</span><div style="min-width:0"><h2>${p.n}</h2>${p.r?`<div class="r">${p.r}</div>`:''}${(meta||p.bp)?`<div class="m">${meta}${p.bp?(meta?' · ':'')+p.bp:''}</div>`:''}</div>`;
   let h='';
-  if(p.live)h+='<span class="liveflag">● pessoa viva — só o nome e o que a família quis mostrar</span>';
+  if(p.live)h+='<span class="liveflag">● pessoa viva — dados que a família quis mostrar</span>';
   const kids=childrenOf(id);
   const rel=relChip('pai',p.f)+relChip('mãe',p.m)+relChip('cônjuge',p.sp)+kids.map(k=>relChip('filho(a)',k)).join('');
   if(rel)h+=`<div class="sec"><h3>Familiares</h3><div class="rel">${rel}</div></div>`;
@@ -674,7 +686,7 @@ function jump(id){res.classList.remove('on');q.value='';openSheet(id);}
 
 document.getElementById('foot').innerHTML='<span class="mono">Arquivo de família · '+Object.keys(P).length+' pessoas</span> — reconstruído de certidões de cartório, registros de paróquia e imigração, dos arquivos de estado italianos e da memória da família. Números de certidão mascarados. Reunido em conjunto pela família, 2026.';
 window.openSheet=openSheet;window.closeSheet=closeSheet;window.toggleC=toggleC;window.zoomBy=zoomBy;window.fitTree=fitTree;window.fitFan=fitFan;window.setFilt=setFilt;window.jump=jump;window.lightbox=lightbox;window.toggleTheme=toggleTheme;
-(function(){var c=0,b=0;Object.keys(P).forEach(function(id){if(P[id].lin==='bra')b++;else c++;});var e;if(e=document.getElementById('nCat'))e.textContent=c;if(e=document.getElementById('nBra'))e.textContent=b;var d=window.matchMedia&&matchMedia('(prefers-color-scheme:dark)').matches;if(e=document.getElementById('tt'))e.textContent=(document.documentElement.getAttribute('data-theme')||(d?'dark':'light'))==='dark'?'☀':'☾';})();
+(function(){try{var sv=localStorage.getItem('cb-tema');if(sv==='dark'||sv==='light')document.documentElement.setAttribute('data-theme',sv);}catch(e){}var c=0,b=0;Object.keys(P).forEach(function(id){if(P[id].lin==='bra')b++;else c++;});var e;if(e=document.getElementById('nCat'))e.textContent=c;if(e=document.getElementById('nBra'))e.textContent=b;var d=window.matchMedia&&matchMedia('(prefers-color-scheme:dark)').matches;if(e=document.getElementById('tt'))e.textContent=(document.documentElement.getAttribute('data-theme')||(d?'dark':'light'))==='dark'?'☀':'☾';})();
 drawTree(true);
 </script>
 </body>
